@@ -1,5 +1,8 @@
 import os
 
+from dotenv import load_dotenv
+load_dotenv() 
+
 from langchain.vectorstores.neo4j_vector import Neo4jVector
 
 from langchain_openai import OpenAIEmbeddings
@@ -26,11 +29,22 @@ from sentence_transformers import SentenceTransformer
 
 HOSPITAL_QA_MODEL = os.getenv("HOSPITAL_QA_MODEL")
 
+class EmbeddingModelWrapper:
+    def __init__(self, model_name):
+        self.model = SentenceTransformer(model_name)
+    
+    def embed_query(self, text):
+        # Assuming that embed_query should return the embedding of the text
+        return self.model.encode(text)
+
+# Initialize the SentenceTransformer model with the wrapper
+embedding_model = EmbeddingModelWrapper('all-MiniLM-L6-v2')
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 neo4j_vector_index = Neo4jVector.from_existing_graph(
 
-    embedding=model,
+    embedding=embedding_model,
 
     url=os.getenv("NEO4J_URI"),
 
